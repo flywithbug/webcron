@@ -1,0 +1,18 @@
+[ORM]2017/11/26 15:22:44  -[Queries/default] - [  OK / db.QueryRow /     0.4ms] - [SELECT COUNT(*) FROM `t_task` T0 WHERE T0.`status` = ? ] - `1`
+[ORM]2017/11/26 15:22:44  -[Queries/default] - [  OK /    db.Query /     0.3ms] - [SELECT T0.`id`, T0.`user_id`, T0.`group_id`, T0.`task_name`, T0.`task_type`, T0.`description`, T0.`cron_spec`, T0.`concurrent`, T0.`command`, T0.`status`, T0.`notify`, T0.`notify_email`, T0.`timeout`, T0.`execute_times`, T0.`prev_time`, T0.`create_time` FROM `t_task` T0 WHERE T0.`status` = ? ORDER BY T0.`id` DESC LIMIT 1000000] - `1`
+2017/11/26 15:22:44 [1;34m[I] [asm_amd64.s:2337] http server Running on http://:8000[0m
+2017/11/26 15:22:46 [1;44m[D] [server.go:2619] |      127.0.0.1|[42m 200 [0m|   1.729174ms|   match|[44m GET     [0m /login   r:/login[0m
+2017/11/26 15:22:52 [1;44m[D] [server.go:2619] |      127.0.0.1|[42m 200 [0m|    1.67552ms|   match|[44m GET     [0m /login   r:/login[0m
+2017/11/26 15:22:53 [1;44m[D] [server.go:2619] |      127.0.0.1|[43m 404 [0m|    229.191µs| nomatch|[44m GET     [0m /index.html[0m
+2017/11/26 15:22:53 [1;44m[D] [server.go:2619] |      127.0.0.1|[42m 200 [0m|   1.370672ms|   match|[44m GET     [0m /static/font/fontawesome-webfont.woff[0m
+[ORM]2017/11/26 15:23:00  -[Queries/default] - [  OK /    db.Query /     0.5ms] - [SELECT T0.`id`, T0.`user_name`, T0.`password`, T0.`salt`, T0.`email`, T0.`last_login`, T0.`last_ip`, T0.`status` FROM `t_user` T0 WHERE T0.`user_name` = ? LIMIT 1] - `admin`
+[ORM]2017/11/26 15:23:00  -[Queries/default] - [  OK /     db.Exec /     1.5ms] - [UPDATE `t_user` SET `user_name` = ?, `password` = ?, `salt` = ?, `email` = ?, `last_login` = ?, `last_ip` = ?, `status` = ? WHERE `id` = ?] - `admin`, `7fef6171469e80d32c0559f88b377245`, ``, `admin@example.com`, `1511680980`, `[`, `0`, `1`
+[ORM]2017/11/26 15:23:00  -[Queries/default] - [  OK /    db.Query /     0.3ms] - [SELECT T0.`id`, T0.`user_name`, T0.`password`, T0.`salt`, T0.`email`, T0.`last_login`, T0.`last_ip`, T0.`status` FROM `t_user` T0 WHERE T0.`id` = ? LIMIT 1] - `1`
+[ORM]2017/11/26 15:23:00  -[Queries/default] - [  OK / db.QueryRow /     0.1ms] - [SELECT COUNT(*) FROM `t_task` T0 ]
+[ORM]2017/11/26 15:23:00  -[Queries/default] - [  OK /    db.Query /     0.2ms] - [SELECT T0.`id`, T0.`user_id`, T0.`group_id`, T0.`task_name`, T0.`task_type`, T0.`description`, T0.`cron_spec`, T0.`concurrent`, T0.`command`, T0.`status`, T0.`notify`, T0.`notify_email`, T0.`timeout`, T0.`execute_times`, T0.`prev_time`, T0.`create_time` FROM `t_task` T0 ORDER BY T0.`id` DESC LIMIT 20]
+[ORM]2017/11/26 15:23:00  -[Queries/default] - [  OK / db.QueryRow /     0.2ms] - [SELECT COUNT(*) FROM `t_task_group` T0 ]
+[ORM]2017/11/26 15:23:00  -[Queries/default] - [  OK /    db.Query /     0.1ms] - [SELECT T0.`id`, T0.`user_id`, T0.`group_name`, T0.`description`, T0.`create_time` FROM `t_task_group` T0 ORDER BY T0.`id` DESC LIMIT 100]
+2017/11/26 15:23:00 [1;44m[D] [server.go:2619] |      127.0.0.1|[42m 200 [0m|   3.131229ms|   match|[44m GET     [0m /task/list   r:/task/list/*[0m
+2017/11/26 15:23:00 [1;44m[D] [server.go:2619] |      127.0.0.1|[42m 200 [0m|    316.056µs|   match|[44m GET     [0m /static/js/base.js[0m
+2017/11/26 15:23:00 [1;44m[D] [server.go:2619] |      127.0.0.1|[42m 200 [0m|    352.324µs|   match|[44m GET     [0m /static/css/pages/dashboard.css[0m
+[ORM]2017/11/26 15:23:00  -[Queries/default] - [  OK /    db.Query /     0.3ms] - [SELECT T0.`id`, T0.`user_name`, T0.`password`, T0.`salt`, T0.`email`, T0.`last_login`, T0.`last_ip`, T0.`status` FROM `t_user` T0 WHERE T0.`id` = ? LIMIT 1] - `1`

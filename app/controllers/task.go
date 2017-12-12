@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	libcron "github.com/lisijie/cron"
-	"github.com/lisijie/webcron/app/jobs"
-	"github.com/lisijie/webcron/app/libs"
-	"github.com/lisijie/webcron/app/models"
+	libcron "webcron/cron"
+	"webcron/app/jobs"
+	"webcron/app/libs"
+	"webcron/app/models"
 	"strconv"
 	"strings"
 	"time"
@@ -91,11 +91,12 @@ func (this *TaskController) Add() {
 			tmp := strings.Split(notifyEmail, "\n")
 			for _, v := range tmp {
 				v = strings.TrimSpace(v)
-				if !libs.IsEmail([]byte(v)) {
-					this.ajaxMsg("无效的Email地址："+v, MSG_ERR)
-				} else {
-					emailList = append(emailList, v)
-				}
+				//if !libs.IsEmail([]byte(v)) {
+				//	this.ajaxMsg("无效的Email地址："+v, MSG_ERR)
+				//} else {
+				//	emailList = append(emailList, v)
+				//}
+				emailList = append(emailList, v)
 			}
 			task.NotifyEmail = strings.Join(emailList, "\n")
 		}
@@ -145,11 +146,12 @@ func (this *TaskController) Edit() {
 			emailList := make([]string, 0, len(tmp))
 			for _, v := range tmp {
 				v = strings.TrimSpace(v)
-				if !libs.IsEmail([]byte(v)) {
-					this.ajaxMsg("无效的Email地址："+v, MSG_ERR)
-				} else {
-					emailList = append(emailList, v)
-				}
+				//if !libs.IsEmail([]byte(v)) {
+				//	this.ajaxMsg("无效的Email地址："+v, MSG_ERR)
+				//} else {
+				//	emailList = append(emailList, v)
+				//}
+				emailList = append(emailList, v)
 			}
 			task.NotifyEmail = strings.Join(emailList, "\n")
 		}

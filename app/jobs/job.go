@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/astaxie/beego"
-	"github.com/lisijie/webcron/app/mail"
-	"github.com/lisijie/webcron/app/models"
+	"webcron/app/mail"
+	"webcron/app/models"
 	"html/template"
 	"os/exec"
 	"runtime/debug"
@@ -179,15 +179,20 @@ func (j *Job) Run() {
 			title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "成功")
 			data["status"] = "成功"
 		}
-
 		content := new(bytes.Buffer)
 		mailTpl.Execute(content, data)
 		ccList := make([]string, 0)
 		if j.task.NotifyEmail != "" {
 			ccList = strings.Split(j.task.NotifyEmail, "\n")
 		}
-		if !mail.SendMail(user.Email, user.UserName, title, content.String(), ccList) {
-			beego.Error("发送邮件超时：", user.Email)
+		fmt.Println(ccList)
+		//if !mail.SendMail(user.Email, user.UserName, title, content.String(), ccList) {
+		//	beego.Error("发送邮件超时：", user.Email)
+		//}
+		if !mail.SendMsg(title,content.String(),ccList) {
+			beego.Error("发送大象消息失败：")
 		}
+
+
 	}
 }

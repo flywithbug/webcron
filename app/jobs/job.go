@@ -144,6 +144,7 @@ func (j *Job) Run() {
 	} else if err != nil {
 		log.Status = models.TASK_ERROR
 		log.Error = err.Error() + ":" + cmdErr
+
 	}
 	j.logId, _ = models.TaskLogAdd(log)
 
@@ -160,39 +161,49 @@ func (j *Job) Run() {
 		}
 
 		var title string
+		var content_str string
+		content_str += fmt.Sprintf("任务ID：%d",j.task.Id)
+		content_str += "\n任务名称："+j.task.TaskName
+		content_str += "\n执行时间："+beego.Date(t, "Y-m-d H:i:s")
+		content_str += fmt.Sprintf("\n执行耗时：%f",float64(ut) / 1000)
 
 		data := make(map[string]interface{})
-		data["task_id"] = j.task.Id
+		data["task_id"] =j.task.Id
 		data["username"] = user.UserName
 		data["task_name"] = j.task.TaskName
 		data["start_time"] = beego.Date(t, "Y-m-d H:i:s")
 		data["process_time"] = float64(ut) / 1000
 		data["output"] = cmdOut
-
 		if isTimeout {
 			title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "超时")
 			data["status"] = fmt.Sprintf("超时（%d秒）", int(timeout/time.Second))
+
 		} else if err != nil {
 			title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "失败")
 			data["status"] = "失败（" + err.Error() + "）"
 		} else {
 			title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "成功")
 			data["status"] = "成功"
+
 		}
+
 		content := new(bytes.Buffer)
 		mailTpl.Execute(content, data)
 		ccList := make([]string, 0)
 		if j.task.NotifyEmail != "" {
 			ccList = strings.Split(j.task.NotifyEmail, "\n")
 		}
+		ccList = append(ccList,user.UserName)
 		fmt.Println(ccList)
 		//if !mail.SendMail(user.Email, user.UserName, title, content.String(), ccList) {
 		//	beego.Error("发送邮件超时：", user.Email)
 		//}
-		if !mail.SendMsg(title,content.String(),ccList) {
+		if !mail.SendMsg(title,content_str,ccList) {
 			beego.Error("发送大象消息失败：")
 		}
 
 
 	}
 }
+
+

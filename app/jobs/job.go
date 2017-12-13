@@ -146,6 +146,7 @@ func (j *Job) Run() {
 		log.Error = err.Error() + ":" + cmdErr
 
 	}
+
 	j.logId, _ = models.TaskLogAdd(log)
 
 	// 更新上次执行时间
@@ -195,9 +196,10 @@ func (j *Job) Run() {
 		}
 		ccList = append(ccList,user.UserName)
 		fmt.Println(ccList)
-		//if !mail.SendMail(user.Email, user.UserName, title, content.String(), ccList) {
-		//	beego.Error("发送邮件超时：", user.Email)
-		//}
+		if !mail.SendMail("erfeng.cheng@dianping.com", user.UserName, title, content.String(), ccList) {
+			beego.Error("发送邮件超时：", user.Email)
+		}
+
 		if !mail.SendMsg(title,content_str,ccList) {
 			beego.Error("发送大象消息失败：")
 		}

@@ -26,7 +26,7 @@
 
 获取源码
 
-	$ go get github.com/lisijie/webcron
+	$ go get github.com/flywithbug/webcron
 	
 打开配置文件 conf/app.conf，修改相关配置。
 	

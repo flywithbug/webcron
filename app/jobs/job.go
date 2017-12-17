@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/astaxie/beego"
-	"webcron/app/mail"
-	"webcron/app/models"
 	"html/template"
 	"os/exec"
 	"runtime/debug"
 	"strings"
 	"time"
+	"unicode/utf8"
+	"webcron/app/mail"
+	"webcron/app/models"
 )
 
 var mailTpl *template.Template
@@ -129,7 +130,7 @@ func (j *Job) Run() {
 	cmdOut, cmdErr, err, isTimeout := j.runFunc(timeout)
 
 	ut := time.Now().Sub(t) / time.Millisecond
-
+	cmdOut = FilterEmoji(cmdOut)
 	// 插入日志
 	log := new(models.TaskLog)
 	log.TaskId = j.id
@@ -137,7 +138,6 @@ func (j *Job) Run() {
 	log.Error = cmdErr
 	log.ProcessTime = int(ut)
 	log.CreateTime = t.Unix()
-
 	if isTimeout {
 		log.Status = models.TASK_TIMEOUT
 		log.Error = fmt.Sprintf("任务执行超过 %d 秒\n----------------------\n%s\n", int(timeout/time.Second), cmdErr)
@@ -146,15 +146,14 @@ func (j *Job) Run() {
 		log.Error = err.Error() + ":" + cmdErr
 	}
 
-	j.logId, _ = models.TaskLogAdd(log)
+	j.logId, err = models.TaskLogAdd(log)
 
 	// 更新上次执行时间
 	j.task.PrevTime = t.Unix()
 	j.task.ExecuteTimes++
- 	err = j.task.Update("PrevTime", "ExecuteTimes")
-	if err != nil{
-		log.Error = err.Error() + ":" + cmdErr
-	}
+	err = j.task.Update("PrevTime", "ExecuteTimes")
+
+	beego.Info(log)
 	// 发送邮件通知
 	if (j.task.Notify == 1 && err != nil) || j.task.Notify == 2 {
 		user, uerr := models.UserGetById(j.task.UserId)
@@ -164,13 +163,13 @@ func (j *Job) Run() {
 
 		var title string
 		var content_str string
-		content_str += fmt.Sprintf("任务ID：%d",j.task.Id)
-		content_str += "\n任务名称："+j.task.TaskName
-		content_str += "\n执行时间："+beego.Date(t, "Y-m-d H:i:s")
-		content_str += fmt.Sprintf("\n执行耗时：%f",float64(ut) / 1000)
+		content_str += fmt.Sprintf("任务ID：%d", j.task.Id)
+		content_str += "\n任务名称：" + j.task.TaskName
+		content_str += "\n执行时间：" + beego.Date(t, "Y-m-d H:i:s")
+		content_str += fmt.Sprintf("\n执行耗时：%f", float64(ut)/1000)
 
 		data := make(map[string]interface{})
-		data["task_id"] =j.task.Id
+		data["task_id"] = j.task.Id
 		data["username"] = user.UserName
 		data["task_name"] = j.task.TaskName
 		data["start_time"] = beego.Date(t, "Y-m-d H:i:s")
@@ -195,18 +194,26 @@ func (j *Job) Run() {
 		if j.task.NotifyEmail != "" {
 			ccList = strings.Split(j.task.NotifyEmail, "\n")
 		}
-		ccList = append(ccList,user.UserName)
+		ccList = append(ccList, user.UserName)
 		fmt.Println(ccList)
 		//if !mail.SendMail("erfeng.cheng@dianping.com", user.UserName, title, content.String(), ccList) {
 		//	beego.Error("发送邮件超时：", user.Email)
 		//}
 
-		if !mail.SendMsg(title,content_str,ccList) {
+		if !mail.SendMsg(title, content_str, ccList) {
 			beego.Error("发送大象消息失败：")
 		}
-
 
 	}
 }
 
-
+func FilterEmoji(content string) string {
+	new_content := ""
+	for _, value := range content {
+		_, size := utf8.DecodeRuneInString(string(value))
+		if size <= 3 {
+			new_content += string(value)
+		}
+	}
+	return new_content
+}

@@ -144,7 +144,6 @@ func (j *Job) Run() {
 	} else if err != nil {
 		log.Status = models.TASK_ERROR
 		log.Error = err.Error() + ":" + cmdErr
-
 	}
 
 	j.logId, _ = models.TaskLogAdd(log)
@@ -152,8 +151,10 @@ func (j *Job) Run() {
 	// 更新上次执行时间
 	j.task.PrevTime = t.Unix()
 	j.task.ExecuteTimes++
-	j.task.Update("PrevTime", "ExecuteTimes")
-
+ 	err = j.task.Update("PrevTime", "ExecuteTimes")
+	if err != nil{
+		log.Error = err.Error() + ":" + cmdErr
+	}
 	// 发送邮件通知
 	if (j.task.Notify == 1 && err != nil) || j.task.Notify == 2 {
 		user, uerr := models.UserGetById(j.task.UserId)
@@ -196,9 +197,9 @@ func (j *Job) Run() {
 		}
 		ccList = append(ccList,user.UserName)
 		fmt.Println(ccList)
-		if !mail.SendMail("erfeng.cheng@dianping.com", user.UserName, title, content.String(), ccList) {
-			beego.Error("发送邮件超时：", user.Email)
-		}
+		//if !mail.SendMail("erfeng.cheng@dianping.com", user.UserName, title, content.String(), ccList) {
+		//	beego.Error("发送邮件超时：", user.Email)
+		//}
 
 		if !mail.SendMsg(title,content_str,ccList) {
 			beego.Error("发送大象消息失败：")

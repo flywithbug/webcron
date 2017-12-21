@@ -40,7 +40,7 @@ func main() {
 	beego.AutoRouter(&controllers.TaskController{})
 	beego.AutoRouter(&controllers.GroupController{})
 	beego.Post("/addtask",controllers.AddTask)
-	beego.Post("/edittask",controllers.EditTaskStatusAction)
+	beego.Post("/taskstatus",controllers.EditTaskStatusAction)
 
 
 	beego.BConfig.WebConfig.Session.SessionOn = true

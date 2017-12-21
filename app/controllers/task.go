@@ -384,6 +384,7 @@ func AddTask(c *context.Context)  {
 		rep["msg"] = "参数解析失败"
 		return
 	}
+	task.UserId = 1
 	task.NotifyEmail = task.NotifyMis
 	task.Status = 0
 	taskId, err := models.TaskAdd(&task)
@@ -393,10 +394,8 @@ func AddTask(c *context.Context)  {
 		rep["msg"] = "服务器错误，请联系开发者（inser fail）"
 		return
 	}
-	task.Id = int(taskId)
-	//rep["data"] = task
 	rep["code"] = 200
-	rep["msg"] = "任务添加成功"
+	rep["taskId"] = taskId
 }
 
 func EditTaskStatusAction(c *context.Context)  {
@@ -448,7 +447,7 @@ func EditTaskStatusAction(c *context.Context)  {
 		rep["code"] = 200
 		return
 	}
-	rep["msg"] = "任务启动成功"
+	rep["taskid"] = "任务启动成功"
 	rep["code"] = 200
 }
 

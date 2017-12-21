@@ -9,6 +9,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/astaxie/beego/context"
+	"io/ioutil"
+	"encoding/json"
+	"fmt"
 )
 
 type TaskController struct {
@@ -363,3 +367,89 @@ func (this *TaskController) Run() {
 
 	this.redirect(beego.URLFor("TaskController.ViewLog", "id", job.GetLogId()))
 }
+
+
+
+func AddTask(c *context.Context)  {
+	rep := make(models.Response)
+	defer func() {
+		c.Output.JSON(rep,true,true)
+	}()
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	var task models.Task
+	err := json.Unmarshal(body,&task)
+	if err != nil {
+		fmt.Println(err.Error())
+		rep["code"] = 400
+		rep["msg"] = "参数解析失败"
+		return
+	}
+	task.NotifyEmail = task.NotifyMis
+	task.Status = 0
+	taskId, err := models.TaskAdd(&task)
+	if err != nil {
+		fmt.Println(err.Error())
+		rep["code"] = 500
+		rep["msg"] = "服务器错误，请联系开发者（inser fail）"
+		return
+	}
+	task.Id = int(taskId)
+	//rep["data"] = task
+	rep["code"] = 200
+	rep["msg"] = "任务添加成功"
+}
+
+func EditTaskStatusAction(c *context.Context)  {
+	rep := make(models.Response)
+	defer func() {
+		c.Output.JSON(rep,true,true)
+	}()
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	var task models.Task
+	err := json.Unmarshal(body,&task)
+	if err != nil{
+		rep["code"] = 400
+		rep["msg"] = "参数解析失败"
+		return
+	}
+	if task.Status != 0 && task.Status != 1 {
+		rep["code"] = 400
+		rep["msg"] = "task状态必须为0（关闭）1 (开启)"
+		return
+	}
+	task1 ,err := models.TaskGetById(task.Id)
+	if err != nil {
+		rep["code"] = 400
+		rep["msg"] = "未查询到该task"
+		return
+	}
+
+	if task.Status == 1 {
+		job, err := jobs.NewJobFromTask(task1)
+		if err != nil {
+			rep["code"] = 500
+			rep["msg"] = "任务添加失败"
+			return
+		}
+		if jobs.AddJob(task1.CronSpec, job) {
+			task1.Status = 1
+			err = task1.Update()
+			if err != nil {
+				rep["code"] = 500
+				rep["msg"] = "任务启动成功，但是状态修改失败"
+				return
+			}
+		}
+	}else {
+		jobs.RemoveJob(task1.Id)
+		task1.Status = 0
+		task1.Update()
+		rep["msg"] = "任务关闭成功"
+		rep["code"] = 200
+		return
+	}
+	rep["msg"] = "任务启动成功"
+	rep["code"] = 200
+}
+
+

@@ -39,6 +39,9 @@ func main() {
 	beego.Router("/help", &controllers.HelpController{}, "*:Index")
 	beego.AutoRouter(&controllers.TaskController{})
 	beego.AutoRouter(&controllers.GroupController{})
+	beego.Post("/addtask",controllers.AddTask)
+	beego.Post("/edittask",controllers.EditTaskStatusAction)
+
 
 	beego.BConfig.WebConfig.Session.SessionOn = true
 	beego.Run()

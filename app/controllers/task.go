@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"fmt"
+	"webcron/app/mail"
 )
 
 type TaskController struct {
@@ -321,7 +322,7 @@ func (this *TaskController) Start() {
 		task.Status = 1
 		task.Update()
 	}
-
+	mail.SendMsgWithTask(task)
 	refer := this.Ctx.Request.Referer()
 	if refer == "" {
 		refer = beego.URLFor("TaskController.List")

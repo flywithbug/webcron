@@ -9,6 +9,10 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"webcron/app/models"
+
+	"strings"
+	"strconv"
 )
 
 var (
@@ -46,6 +50,7 @@ func init() {
 	}()
 }
 
+
 func SendMail(address, name, subject, content string, cc []string) bool {
 	fmt.Println(address,name,subject,content,cc)
 	mail := utils.NewEMail(config)
@@ -80,6 +85,41 @@ func SendMsg(subject string,content string,cc []string)bool  {
 	}
 	return true
 }
+func SendMsgWithTask(task* models.Task )  {
+	fmt.Println("task",task.Id)
+
+	ccList := make([]string, 0)
+	if task.NotifyEmail != "" {
+		ccList = strings.Split(task.NotifyEmail, "\n")
+	}
+	user,err := models.UserGetById(task.Id)
+	if err != nil{
+		beego.Error(err.Error())
+	}else {
+		ccList = append(ccList, user.UserName)
+	}
+	fmt.Println(ccList)
+
+	url := "http://10.66.3.50:5000/nuwa/newton/api/mta/applastestver?appid="
+	b ,err := GET(url+strconv.Itoa(task.Id))
+	if err != nil {
+		beego.Error(err.Error())
+		return
+	}
+	var result map[string]interface{}
+	err = json.Unmarshal(b,&result)
+	if err != nil {
+		beego.Error(err.Error())
+	}
+	fmt.Println(result)
+	title := task.TaskName + "：定时任务启动"
+	content := result["data"]
+	fmt.Println(title,content)
+	if len(ccList) != 0 {
+		SendMsg(title,content.(string),ccList)
+
+	}
+}
 
 
 func POST(url string,v interface{},header map[string]string) ([]byte, error)  {
@@ -100,5 +140,19 @@ func POST(url string,v interface{},header map[string]string) ([]byte, error)  {
 	defer resp.Body.Close()
 	body,err := ioutil.ReadAll(resp.Body)
 	return body,err
+}
+
+
+func GET(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
